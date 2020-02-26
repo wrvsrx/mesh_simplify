@@ -1,6 +1,8 @@
 include_directories(parse)
 include_directories(simplify)
+include_directories(core)
 add_executable(mesh main.cpp)
 add_subdirectory(parse)
 add_subdirectory(simplify)
+add_subdirectory(core)
 link_libraries(mesh Parse Simplify)

@@ -1,15 +1,22 @@
 #pragma once
+#include "Edge.h"
+#include "Q_matrix.h"
 #include "Vec.h"
 #include <initializer_list>
+#include <iostream>
 #include <utility>
 #include <vector>
 class Vertex : public Vec<double, 4> {
-  using Edge = std::pair<Vertex, Vertex>;
-  using Face = std::pair<Edge, Edge>;
 
 public:
-  std::vector<Face> faces_;
-  Vertex(double x, double y, double z);
+  Vertex(double x, double y, double z, std::size_t index);
+  Vertex(double pos[3], std::size_t index);
+  Edge *search_neiborhood(std::size_t index);
+  Edge *search_neiborhood(Edge const &pa);
+  friend std::ostream &operator<<(std::ostream &out, Vertex const &o);
+  bool isdeleted_;
+  std::size_t index_;
+  Q_Matrix ma_;
+  std::vector<Edge *> pair_set_;
 };
 
-Vertex::Vertex(double x, double y, double z) : Vec<double, 4>({x, y, z, 1}) {}

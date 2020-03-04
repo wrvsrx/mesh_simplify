@@ -1,0 +1,30 @@
+- [x] read file
+	- [x] store vertex (position, index)
+	- [x] store edge <v1, v2>, add &it to v1, v2's pair set
+	- [x] store plane <v1, v2, v3>
+
+- [x] build heap
+	- [x] traverse plane, cal a, b, c, d
+		- [x] add to Q of v1, v2, v3
+	- [ ] traverse (vi, vj)
+		- [ ] judge if it's edge (search vj in vi's neighbor)
+			- [ ] if not edge
+				- [ ] judge t
+					- [ ] if t
+						- [ ] add pair
+		- [ ] cal cost, add cost to pair(edge)
+		- [ ] cal v, add to pair(edge)
+		- [ ] add into heap
+- [ ] remove point from heap
+	- [ ] judge number
+	- [ ] replace v1 with v
+	- [ ] mark v2 as deleted, add "merge to v1" mark
+	- [ ] traverse pair\* set of to v2, add v2's pair set to v1's
+	- [ ] traverse pair next to v1, update cost and v.
+- [ ] write to file
+	- [ ] traverse vertex
+		- [ ] write undeleted vertex, update index
+		- [ ] if v is deleted, use merge to to find the real position, use stack to update index.
+	- [ ] traverse plane
+		- [ ] traverse v1, v2, v3
+			- [ ] if not vi's index = vj's index write plane.

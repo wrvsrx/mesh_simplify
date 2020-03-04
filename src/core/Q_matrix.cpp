@@ -7,7 +7,9 @@ Q_Matrix::Q_Matrix() {
 
 Q_Matrix::Q_Matrix(Matrix<double, 4, 4> const &r) : Matrix<double, 4, 4>(r) {}
 
-// Q_Matrix Q_Matrix::inverse_derivate() {}
+Matrix<double, 4, 4> Q_Matrix::inverse_derivate() {
+
+}
 
 void Q_Matrix::add(Vec<double, 4> const &paramater) {
   *this = *this + paramater * paramater.inverse();

@@ -11,6 +11,7 @@ public:
   T *operator[](int index);
   T const *operator[](int index) const;
   T determinate();
+  Matrix<T, dim1, dim2> inverse();
   void swap_row(int r1, int r2);
   void swap_column(int c1, int c2);
 
@@ -85,26 +86,71 @@ template <class T, int dim1, int dim2> T Matrix<T, dim1, dim2>::determinate() {
   Matrix<T, dim1, dim2> tmp = *this;
   int n = dim1;
   bool isnegative = false;
-  T zero(0);
+  T const zero(0), one(1);
   for (int i = 0; i < n; ++i) {
     if (tmp[i][i] == zero) {
       for (int j = i + 1; j < n; ++j) {
-        if (tmp[j][i] != T(0)) {
+        if (tmp[j][i] != zero) {
           tmp.swap_row(i, j);
           isnegative = !isnegative;
           break;
         }
       }
+      return zero;
     }
     for (int j = i + 1; j < n; ++j) {
+      T alpha = tmp[j][i] / tmp[i][i];
       for (int k = i + 1; k < n; ++k)
-        tmp[j][k] -= tmp[i][k] * tmp[j][i] / tmp[i][i];
+        tmp[j][k] -= tmp[i][k] * alpha;
     }
   }
-  T out(1);
+  T out(one);
   for (int i = 0; i < n; ++i)
     out *= tmp[i][i];
   return isnegative ? -out : out;
+}
+
+template <class T, int dim1, int dim2>
+Matrix<T, dim1, dim2> Matrix<T, dim1, dim2>::inverse() {
+  if (dim1 != dim2) {
+    std::domain_error unconsistent_dim("unconsistent dim");
+    throw(unconsistent_dim);
+  }
+  Matrix<T, dim1, dim2> tmp(*this), out;
+  int n = dim1;
+  T const zero(0), one(1);
+  for (int i = 0; i < n; ++i)
+    for (int j = 0; j < n; ++j)
+      out[i][j] = zero;
+  for (int i = 0; i < n; ++i)
+    out[i][i] = one;
+  for (int i = 0; i < n; ++i) {
+    if (tmp[i][i] == zero) {
+      for (int j = i + 1; j < n; ++j) {
+        if (tmp[j][i] != zero) {
+          tmp.swap_row(i, j);
+          out.swap_row(i, j);
+          break;
+        }
+        std::domain_error unconsistent_dim("not inversable");
+        throw(unconsistent_dim);
+      }
+    }
+    for (int j = 0; j < n; ++j) {
+      if (j != i) {
+        T alpha = tmp[j][i] / tmp[i][i];
+        for (int k = 0; k < n; ++k) {
+          out[j][k] -= out[i][k] * alpha;
+          tmp[j][k] -= tmp[i][k] * alpha;
+        }
+      }
+    }
+  }
+  for (int i = 0; i < n; ++i)
+    for (int j = 0; j < n; ++j) {
+      out[i][j] *= one / tmp[i][i];
+    }
+  return out;
 }
 
 template <class T, int dim1, int dim2>

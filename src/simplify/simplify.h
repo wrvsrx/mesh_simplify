@@ -13,5 +13,6 @@ protected:
   std::vector<Vertex> &vertexs_;
   std::list<Edge> &pairs_;
   std::list<Face> &faces_;
-  double threshold_;
+  std::priority_queue<Edge> heap_;
+  double threshold2_;
 };

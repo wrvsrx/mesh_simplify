@@ -6,7 +6,7 @@
 #include <iostream>
 #include <utility>
 #include <vector>
-class Vertex : public Vec<double, 4> {
+class Vertex : public Vec<double, 3> {
 
 public:
   Vertex(double x, double y, double z, std::size_t index);

@@ -5,6 +5,8 @@ class Q_Matrix : public Matrix<double, 4, 4> {
 public:
   Q_Matrix();
   Q_Matrix(Matrix<double, 4, 4> const &);
-  Matrix<double, 4, 4> inverse_derivate();
+  Vec<double, 3> max_point();
+  double cal_norm(Vec<double, 3> const &);
+  double cal_norm(Vec<double, 4> const &);
   void add(Vec<double, 4> const &paramater);
 };

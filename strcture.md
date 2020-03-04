@@ -7,13 +7,13 @@
 	- [x] traverse plane, cal a, b, c, d
 		- [x] add to Q of v1, v2, v3
 	- [ ] traverse (vi, vj)
-		- [ ] judge if it's edge (search vj in vi's neighbor)
-			- [ ] if not edge
-				- [ ] judge t
-					- [ ] if t
-						- [ ] add pair
-		- [ ] cal cost, add cost to pair(edge)
-		- [ ] cal v, add to pair(edge)
+		- [x] judge if it's edge (search vj in vi's neighbor)
+			- [x] if not edge
+				- [x] judge t
+					- [x] if t
+						- [x] add pair
+		- [x] cal cost, add cost to pair(edge)
+		- [x] cal v, add to pair(edge)
 		- [ ] add into heap
 - [ ] remove point from heap
 	- [ ] judge number

@@ -1,10 +1,10 @@
 #include "Vertex.h"
 Vertex::Vertex(double x, double y, double z, std::size_t index)
-    : Vec<double, 4>({x, y, z, 1}), isdeleted_(false), index_(index), ma_(),
+    : Vec<double, 3>({x, y, z}), isdeleted_(false), index_(index), ma_(),
       pair_set_() {}
 
 Vertex::Vertex(double pos[3], std::size_t index)
-    : Vec<double, 4>({pos[0], pos[1], pos[2], 1}), isdeleted_(false),
+    : Vec<double, 3>({pos[0], pos[1], pos[2]}), isdeleted_(false),
       index_(index), ma_(), pair_set_() {}
 
 Edge *Vertex::search_neiborhood(std::size_t index) {

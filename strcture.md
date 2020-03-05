@@ -15,7 +15,7 @@
 		- [x] cal cost, add cost to pair(edge)
 		- [x] cal v, add to pair(edge)
 		- [x] add into heap
-- [ ] test
+- [x] test
 - [ ] remove point from heap
 	- [ ] judge number
 	- [ ] replace v1 with v

@@ -3,8 +3,8 @@
 #include <initializer_list>
 template <class T, int dim> class Vec : public Matrix<T, dim, 1> {
 public:
-  Vec(std::initializer_list<T>);
   Vec();
+  Vec(std::initializer_list<T>);
   Vec(Vec<T, dim> const &);
   Vec(Matrix<T, dim, 1> const &);
   T &operator[](int index);
@@ -15,6 +15,8 @@ public:
 
 template <class T, int dim1, int dim2>
 Vec<double, 3> cross(Vec<T, dim1> const &, Vec<T, dim2> const &);
+
+template <class T, int dim> Vec<T, dim>::Vec() : Matrix<T, dim, 1>() {}
 
 template <class T, int dim> Vec<T, dim>::Vec(std::initializer_list<T> init) {
   int i = 0;

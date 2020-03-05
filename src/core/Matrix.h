@@ -10,6 +10,7 @@ public:
   Matrix(Matrix<T, dim1, dim2> const &);
   T *operator[](int index);
   T const *operator[](int index) const;
+  Matrix<T, dim1, dim2> operator-() const;
   T determinate();
   Matrix<T, dim1, dim2> inverse();
   void swap_row(int r1, int r2);
@@ -76,6 +77,15 @@ T *Matrix<T, dim1, dim2>::operator[](int index) {
 template <class T, int dim1, int dim2>
 T const *Matrix<T, dim1, dim2>::operator[](int index) const {
   return data_[index];
+}
+
+template <class T, int dim1, int dim2>
+Matrix<T, dim1, dim2> Matrix<T, dim1, dim2>::operator-() const {
+  Matrix<T, dim1, dim2> out;
+  for (int i = 0; i < dim1; ++i)
+    for (int j = 0; j < dim2; ++j)
+      out[i][j] = - data_[i][j];
+  return out;
 }
 
 template <class T, int dim1, int dim2> T Matrix<T, dim1, dim2>::determinate() {

@@ -6,17 +6,18 @@
 #include <iostream>
 #include <utility>
 #include <vector>
+#include <set>
 class Vertex : public Vec<double, 3> {
 
 public:
   Vertex(double x, double y, double z, std::size_t index);
   Vertex(double pos[3], std::size_t index);
-  Edge *search_neiborhood(std::size_t index);
-  Edge *search_neiborhood(Edge const &pa);
+  bool search_neiborhood(std::size_t index);
   friend std::ostream &operator<<(std::ostream &out, Vertex const &o);
   bool isdeleted_;
   std::size_t index_;
   Q_Matrix ma_;
-  std::vector<Edge *> pair_set_;
+  std::set<std::size_t> neibor_;
+  std::set<std::size_t> pair_location_;
 };
 

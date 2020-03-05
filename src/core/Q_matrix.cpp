@@ -16,7 +16,7 @@ Vec<double, 3> Q_Matrix::max_point() {
       submatrix[i][j] = data_[i][j];
     vec[i] = data_[3][i];
   }
-  return submatrix.inverse() * vec;
+  return - (submatrix.inverse() * vec);
 }
 
 double Q_Matrix::cal_norm(Vec<double, 3> const &input) {

@@ -1,16 +1,17 @@
-#include "Matrix.h"
 #include "core.h"
 #include "parse.h"
+#include "simplify.h"
 #include <iostream>
+#include <iterator> // debug
+#include <list>
 #include <string>
+#include <vector>
 using namespace std;
 int main() {
-  Matrix<double, 3, 3> m1({{1, 1, 0}, {1, 2, 0}, {0, 0, 1}});
-  Matrix<double, 3, 3> m2(m1.inverse());
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j)
-      cout << m2[i][j] << ' ';
-    cout << endl;
-  }
+  std::string name("../resources/test.obj");
+  std::vector<Vertex> vs;
+  std::list<Face> fs;
+  read_file(name, vs, fs);
+  Simplify sim(vs, fs);
   return 0;
 }

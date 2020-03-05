@@ -1,17 +1,15 @@
 #include "parse.h"
 #include <cstddef>
 #include <fstream>
-void add_edge(std::size_t vert1, std::size_t vert2, std::vector<Vertex> &vertex,
-              std::list<Edge> &edge) {
-  Edge tmp(vert1, vert2);
-  if (!vertex[vert1].search_neiborhood(tmp)) {
-    edge.push_back(tmp);
-    vertex[vert1].pair_set_.push_back(&(edge.back()));
-    vertex[vert2].pair_set_.push_back(&(edge.back()));
+void add_edge(std::size_t vert1, std::size_t vert2,
+              std::vector<Vertex> &vertex) {
+  if (!vertex[vert1].search_neiborhood(vert2)) {
+    vertex[vert1].neibor_.insert(vert2);
+    vertex[vert2].neibor_.insert(vert1);
   }
 }
 void read_file(std::string name, std::vector<Vertex> &vertex,
-               std::list<Edge> &edge, std::list<Face> &face) {
+               std::list<Face> &face) {
   std::ifstream fin;
   fin.open(name);
   char *chara = new char[128];
@@ -33,15 +31,15 @@ void read_file(std::string name, std::vector<Vertex> &vertex,
       for (int i = 0; i < 3; ++i)
         --vert[i];
       face.push_back(Face(vert));
-      add_edge(vert[0], vert[1], vertex, edge);
-      add_edge(vert[0], vert[2], vertex, edge);
+      for (int j = 0; j < 3; ++j)
+        add_edge(vert[j], vert[(j + 1) % 3], vertex);
     }
   }
   fin.close();
 }
 
 void write_file(std::string name, std::vector<Vertex> &vertex,
-                std::list<Edge> &edge, std::list<Face> &face) {
+                std::list<Face> &face) {
   std::ofstream fout;
   fout.open(name);
   for (Vertex const &v : vertex) {

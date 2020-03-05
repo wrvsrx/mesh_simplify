@@ -1,11 +1,15 @@
 #include "simplify.h"
 #include "core.h"
+#include <algorithm>
 #include <cstddef>
 #include <iostream>
-#include <queue>
 Simplify::Simplify(std::vector<Vertex> &vs, std::list<Edge> &es,
                    std::list<Face> &fs, double threshold)
-    : vertexs_(vs), pairs_(es), faces_(fs), threshold2_(threshold * threshold) {
+    : vertexs_(vs), pairs_(es), faces_(fs),
+      cmp([](Edge *const &l, Edge *const &r) -> bool {
+        return l->cost_ > r->cost_;
+      }),
+      threshold2_(threshold * threshold) {
   using std::size_t;
   size_t v_number = vertexs_.size(), f_number = pairs_.size();
   for (Face &f : fs) {
@@ -56,7 +60,7 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Edge> &es,
         }
         p->cost_ = min_cost;
       }
-      
+      std::push_heap(heap_.begin(), heap_.end(), cmp);
     }
   }
 }

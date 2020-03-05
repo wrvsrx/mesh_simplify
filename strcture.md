@@ -6,7 +6,7 @@
 - [x] build heap
 	- [x] traverse plane, cal a, b, c, d
 		- [x] add to Q of v1, v2, v3
-	- [ ] traverse (vi, vj)
+	- [x] traverse (vi, vj)
 		- [x] judge if it's edge (search vj in vi's neighbor)
 			- [x] if not edge
 				- [x] judge t
@@ -14,7 +14,8 @@
 						- [x] add pair
 		- [x] cal cost, add cost to pair(edge)
 		- [x] cal v, add to pair(edge)
-		- [ ] add into heap
+		- [x] add into heap
+- [ ] test
 - [ ] remove point from heap
 	- [ ] judge number
 	- [ ] replace v1 with v

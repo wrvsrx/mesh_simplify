@@ -1,7 +1,6 @@
 #pragma once
 #include "core.h"
 #include <list>
-#include <queue>
 #include <utility>
 #include <vector>
 class Simplify {
@@ -13,6 +12,7 @@ protected:
   std::vector<Vertex> &vertexs_;
   std::list<Edge> &pairs_;
   std::list<Face> &faces_;
-  std::priority_queue<Edge> heap_;
+  std::vector<Edge *> heap_;
+  bool (*cmp)(Edge *const &, Edge *const &);
   double threshold2_;
 };

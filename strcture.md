@@ -22,10 +22,10 @@
 	- [ ] mark v2 as deleted, add "merge to v1" mark
 	- [ ] traverse pair\* set of to v2, add v2's pair set to v1's
 	- [ ] traverse pair next to v1, update cost and v.
-- [ ] write to file
-	- [ ] traverse vertex
-		- [ ] write undeleted vertex, update index
-		- [ ] if v is deleted, use merge to to find the real position, use stack to update index.
-	- [ ] traverse plane
-		- [ ] traverse v1, v2, v3
-			- [ ] if not vi's index = vj's index write plane.
+- [x] write to file
+	- [x] traverse vertex
+		- [x] write undeleted vertex, update index
+		- [x] if v is deleted, use merge to to find the real position, use stack to update index.
+	- [x] traverse plane
+		- [x] traverse v1, v2, v3
+			- [x] if not vi's index = vj's index write plane.

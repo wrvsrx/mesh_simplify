@@ -1,6 +1,6 @@
-#include "core.h"
-#include "parse.h"
-#include "simplify.h"
+#include "Core.h"
+#include "Parse.h"
+#include "Simplify.h"
 #include <iostream>
 #include <iterator> // debug
 #include <list>

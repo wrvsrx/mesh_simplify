@@ -1,4 +1,4 @@
-#include "parse.h"
+#include "Parse.h"
 #include <cstddef>
 #include <fstream>
 void add_edge(std::size_t vert1, std::size_t vert2,

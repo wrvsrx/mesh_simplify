@@ -1,5 +1,5 @@
-#include "simplify.h"
-#include "core.h"
+#include "Simplify.h"
+#include "Core.h"
 #include <algorithm>
 #include <cstddef>
 #include <iostream>

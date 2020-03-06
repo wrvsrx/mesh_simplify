@@ -9,6 +9,8 @@ public:
   double cost_;
   Vec<double, 3> position_;
   std::pair<std::size_t, std::size_t> pair_;
+  bool ischanged_;
+  bool isdeleted_;
 
 protected:
   friend bool operator==(Edge const &, Edge const &);

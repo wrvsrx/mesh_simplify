@@ -14,6 +14,7 @@ public:
   Vertex(double pos[3], std::size_t index);
   bool search_neiborhood(std::size_t index);
   friend std::ostream &operator<<(std::ostream &out, Vertex const &o);
+  Vertex &operator=(Vec<double, 3> const &);
   bool isdeleted_;
   std::size_t index_;
   Q_Matrix ma_;

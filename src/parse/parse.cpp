@@ -42,15 +42,27 @@ void write_file(std::string name, std::vector<Vertex> &vertex,
                 std::list<Face> &face) {
   std::ofstream fout;
   fout.open(name);
-  for (Vertex const &v : vertex) {
+  for (Vertex &v : vertex) {
+    Vertex *vtmp = &v;
+    while (vtmp->isdeleted_) {
+      vtmp = &(vertex[vtmp->index_]);
+    }
+    v.index_ = vtmp->index_;
+  }
+  std::size_t ind = 0;
+  for (Vertex &v : vertex) {
     if (!v.isdeleted_) {
       fout << v << std::endl;
+      v.index_ = ind++;
     }
   }
   for (Face const &f : face) {
     std::size_t ver[3];
     for (int i = 0; i < 3; ++i) {
-      ver[i] = vertex[f.vertex_[i]].index_;
+      if (vertex[f.vertex_[i]].isdeleted_)
+        ver[i] = vertex[vertex[f.vertex_[i]].index_].index_;
+      else
+        ver[i] = vertex[f.vertex_[i]].index_;
     }
     if (ver[0] != ver[1] && ver[1] != ver[2] && ver[2] != ver[0]) {
       fout << 'f' << ' ' << ver[0] + 1 << ' ' << ver[1] + 1 << ' ' << ver[2] + 1

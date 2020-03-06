@@ -16,12 +16,14 @@
 		- [x] cal v, add to pair(edge)
 		- [x] add into heap
 - [x] test
-- [ ] remove point from heap
-	- [ ] judge number
-	- [ ] replace v1 with v
-	- [ ] mark v2 as deleted, add "merge to v1" mark
-	- [ ] traverse pair\* set of to v2, add v2's pair set to v1's
-	- [ ] traverse pair next to v1, update cost and v.
+- [x] remove point from heap
+	- [x] judge number
+	- [x] replace v1 with v
+	- [x] mark v2 as deleted, add "merge to v1" mark
+	- [x] remove top of heap
+	- [x] traverse pair\* set of to v2, add v2's pair set to v1's
+	- [x] update Q of v1
+	- [x] traverse pair next to v1, update cost and v, update heap
 - [x] write to file
 	- [x] traverse vertex
 		- [x] write undeleted vertex, update index

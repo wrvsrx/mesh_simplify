@@ -10,7 +10,7 @@ public:
   T &operator[](int index);
   T const &operator[](int index) const;
   Matrix<T, 1, dim> inverse() const;
-  T norm() const;
+  T norm2() const;
 };
 
 template <class T, int dim1, int dim2>
@@ -48,7 +48,7 @@ template <class T, int dim> Matrix<T, 1, dim> Vec<T, dim>::inverse() const {
   return out;
 }
 
-template <class T, int dim> T Vec<T, dim>::norm() const {
+template <class T, int dim> T Vec<T, dim>::norm2() const {
   return (this->inverse() * (*this))[0][0];
 }
 

@@ -16,5 +16,7 @@ protected:
   std::vector<Edge> heap_;
   void swap_pairs(std::size_t index1, std::size_t index2);
   void downflow(std::size_t index);
+  void overflow(std::size_t index);
+  void update_cost(std::size_t index);
   void remove();
 };

@@ -2,7 +2,6 @@
 #include "Parse.h"
 #include "Simplify.h"
 #include <iostream>
-#include <iterator> // debug
 #include <list>
 #include <string>
 #include <vector>
@@ -22,7 +21,7 @@ int main() {
   std::list<Face> fs;
   read_file(name, vs, fs);
   Simplify sim(vs, fs);
-  sim.simplify(1000);
+  sim.simplify(100);
   write_file("../output/test.obj", vs, fs);
   return 0;
 }

@@ -36,7 +36,7 @@ void Face::set_parameter(std::vector<Vertex> const &pa) {
     isnegative *= -1;
   }
   double fake_norm = 0;
-  for (int i = 0; i < 3; ++i) 
+  for (int i = 0; i < 3; ++i)
     fake_norm += paramater_[i] * paramater_[i];
   fake_norm = sqrt(fake_norm);
   paramater_ = (1 / fake_norm) * paramater_;

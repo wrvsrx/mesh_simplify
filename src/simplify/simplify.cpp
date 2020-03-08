@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <iostream>
+#include <stack>
 struct Q_result {
   Vec<double, 3> position_;
   double cost_;
@@ -18,6 +19,9 @@ Q_result Q_calculate(std::vector<Vertex> &vs, std::size_t index1,
   } catch (std::domain_error) {
     // compare which is min and use it as position and use it to calculate
     // cost
+#ifdef DEBUG
+    std::cout << "No solution" << std::endl;
+#endif
     double cost[3];
     cost[0] = Q.cal_norm(vs[index1]);
     cost[1] = Q.cal_norm(vs[index2]);
@@ -63,7 +67,7 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
       if (isneibor) {
         heap_.push_back(Edge(i, j));
       } else {
-        if (Vec<double, 3>(vs[i] - vs[j]).norm() < threshold2_) {
+        if (Vec<double, 3>(vs[i] - vs[j]).norm2() < threshold2_) {
           heap_.push_back(Edge(i, j));
         } else {
           continue;
@@ -83,15 +87,24 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
 }
 
 void Simplify::swap_pairs(std::size_t index1, std::size_t index2) {
-  vertexs_[heap_[index1].pair_.first].pair_location_.erase(index1);
-  vertexs_[heap_[index1].pair_.second].pair_location_.erase(index1);
-  vertexs_[heap_[index2].pair_.first].pair_location_.erase(index2);
-  vertexs_[heap_[index2].pair_.second].pair_location_.erase(index2);
+  bool iscontained[4] = {false, false, false, false};
+  if (vertexs_[heap_[index1].pair_.first].pair_location_.erase(index1))
+    iscontained[0] = true;
+  if (vertexs_[heap_[index1].pair_.second].pair_location_.erase(index1))
+    iscontained[1] = true;
+  if (vertexs_[heap_[index2].pair_.first].pair_location_.erase(index2))
+    iscontained[2] = true;
+  if (vertexs_[heap_[index2].pair_.second].pair_location_.erase(index2))
+    iscontained[3] = true;
   std::swap(heap_[index1], heap_[index2]);
-  vertexs_[heap_[index1].pair_.first].pair_location_.insert(index1);
-  vertexs_[heap_[index1].pair_.second].pair_location_.insert(index1);
-  vertexs_[heap_[index2].pair_.first].pair_location_.insert(index2);
-  vertexs_[heap_[index2].pair_.second].pair_location_.insert(index2);
+  if (iscontained[2])
+    vertexs_[heap_[index1].pair_.first].pair_location_.insert(index1);
+  if (iscontained[3])
+    vertexs_[heap_[index1].pair_.second].pair_location_.insert(index1);
+  if (iscontained[0])
+    vertexs_[heap_[index2].pair_.first].pair_location_.insert(index2);
+  if (iscontained[1])
+    vertexs_[heap_[index2].pair_.second].pair_location_.insert(index2);
 }
 
 void Simplify::downflow(std::size_t index) {
@@ -107,24 +120,12 @@ void Simplify::downflow(std::size_t index) {
   std::size_t largest = index, left = (index << 1) + 1,
               right = (index << 1) + 2;
   if (heap_[left].ischanged_) {
-    if (heap_[left].isdeleted_) {
-      swap_pairs(left, heap_.size() - 1);
-      heap_.pop_back();
-      downflow(left);
-    } else {
-      heap_[left].ischanged_ = false;
-      downflow(left);
-    }
+    heap_[left].ischanged_ = false;
+    downflow(left);
   }
   if (heap_[right].ischanged_) {
-    if (heap_[right].isdeleted_) {
-      swap_pairs(right, heap_.size() - 1);
-      heap_.pop_back();
-      downflow(right);
-    } else {
-      heap_[right].ischanged_ = false;
-      downflow(right);
-    }
+    heap_[right].ischanged_ = false;
+    downflow(right);
   }
   if (heap_[largest] < heap_[left])
     largest = left;
@@ -137,46 +138,116 @@ void Simplify::downflow(std::size_t index) {
 }
 
 void Simplify::remove() {
+  // debug
   downflow(0);
-  std::size_t f = heap_.front().pair_.first, s = heap_.front().pair_.second;
+  std::size_t fin = heap_.front().pair_.first, sin = heap_.front().pair_.second;
   Vertex &fir = vertexs_[heap_.front().pair_.first],
          &sec = vertexs_[heap_.front().pair_.second];
-  fir = heap_.front().position_;
-  swap_pairs(0, heap_.size() - 1);
-  fir.pair_location_.erase(heap_.size() - 1);
-  sec.pair_location_.erase(heap_.size() - 1);
-  heap_.pop_back();
-  downflow(0);
+  fir = heap_[0].position_;
+  fir.ma_ = fir.ma_ + sec.ma_;
   sec.isdeleted_ = true;
   sec.index_ = fir.index_;
-  for (std::size_t const &index : sec.pair_location_) {
-    if (heap_[index].pair_.first == s)
-      heap_[index].pair_.first = f;
-    if (heap_[index].pair_.second == s)
-      heap_[index].pair_.second = f;
-    for (std::size_t const &i : fir.pair_location_)
-      if (heap_[i] == heap_[index]) {
-        heap_[index].ischanged_ = true;
-        heap_[index].isdeleted_ = true;
-        if (heap_[index].pair_.first != f)
-          vertexs_[heap_[index].pair_.first].pair_location_.erase(index);
-        if (heap_[index].pair_.second != f)
-          vertexs_[heap_[index].pair_.second].pair_location_.erase(index);
+  fir.pair_location_.erase(0);
+  sec.pair_location_.erase(0);
+  for (std::size_t const &s : fir.pair_location_) {
+    Q_result out =
+        Q_calculate(vertexs_, heap_[s].pair_.first, heap_[s].pair_.second);
+    heap_[s].cost_ = out.cost_;
+    heap_[s].position_ = out.position_;
+    heap_[s].ischanged_ = true;
+  }
+  std::stack<std::size_t> tmp;
+  for (std::size_t const &s : sec.pair_location_) {
+    if (heap_[s].pair_.first == sin)
+      heap_[s].pair_.first = fin;
+    if (heap_[s].pair_.second == sin)
+      heap_[s].pair_.second = fin;
+    for (std::size_t const &c : fir.pair_location_) {
+      if (heap_[s] == heap_[c]) {
+        tmp.push(s);
         break;
       }
-    if (!heap_[index].isdeleted_)
-      fir.pair_location_.insert(index);
+    }
+    if (tmp.empty() || tmp.top() != s) {
+      Q_result out =
+          Q_calculate(vertexs_, heap_[s].pair_.first, heap_[s].pair_.second);
+      fir.pair_location_.insert(s);
+      heap_[s].cost_ = out.cost_;
+      heap_[s].position_ = out.position_;
+      heap_[s].ischanged_ = true;
+    }
   }
-  fir.ma_ = fir.ma_ + sec.ma_;
-  for (std::size_t const &index : fir.pair_location_) {
-    Q_result out = Q_calculate(vertexs_, heap_[index].pair_.first,
-                               heap_[index].pair_.second);
-    heap_[index].position_ = out.position_;
-    heap_[index].ischanged_ = true;
+  while (!tmp.empty()) {
+    heap_[tmp.top()].ischanged_ = true;
+    heap_[tmp.top()].isdeleted_ = true;
+    tmp.pop();
   }
+  heap_[0].ischanged_ = true;
+  heap_[0].isdeleted_ = true;
+
+  // std::make_heap(heap_.begin(), heap_.end());
+  // for (auto &v : vertexs_)
+  // v.pair_location_.clear();
+  // for (std::size_t i = 0; i < heap_.size(); ++i) {
+  // vertexs_[heap_[i].pair_.first].pair_location_.insert(i);
+  // vertexs_[heap_[i].pair_.second].pair_location_.insert(i);
+  // }
+  // debug
+
+  // downflow(0);
+  // std::size_t f = heap_.front().pair_.first, s = heap_.front().pair_.second;
+  // Vertex &fir = vertexs_[heap_.front().pair_.first],
+  // &sec = vertexs_[heap_.front().pair_.second];
+  // #ifdef DEBUG
+  // if (Vec<double, 3>(heap_.front().position_ - fir).norm2() >
+  // Vec<double, 3>(sec - fir).norm2()) {
+  // std::cout << "too far" << std::endl;
+  // std::cout << Vec<double, 3>(heap_.front().position_ - fir).norm2()
+  // << std::endl;
+  // std::cout << Vec<double, 3>(sec - fir).norm2() << std::endl;
+  // }
+  // #endif
+  // fir = heap_.front().position_;
+  // swap_pairs(0, heap_.size() - 1);
+  // fir.pair_location_.erase(heap_.size() - 1);
+  // sec.pair_location_.erase(heap_.size() - 1);
+  // heap_.pop_back();
+  // downflow(0);
+  // sec.isdeleted_ = true;
+  // sec.index_ = fir.index_;
+  // for (std::size_t const &index : sec.pair_location_) {
+  // if (heap_[index].pair_.first == s)
+  // heap_[index].pair_.first = f;
+  // if (heap_[index].pair_.second == s)
+  // heap_[index].pair_.second = f;
+  // for (std::size_t const &i : fir.pair_location_)
+  // if (heap_[i] == heap_[index]) {
+  // heap_[index].ischanged_ = true;
+  // heap_[index].isdeleted_ = true;
+  // if (heap_[index].pair_.first != f)
+  // vertexs_[heap_[index].pair_.first].pair_location_.erase(index);
+  // if (heap_[index].pair_.second != f)
+  // vertexs_[heap_[index].pair_.second].pair_location_.erase(index);
+  // break;
+  // }
+  // if (!heap_[index].isdeleted_)
+  // fir.pair_location_.insert(index);
+  // }
+  // fir.ma_ = fir.ma_ + sec.ma_;
+  // for (std::size_t const &index : fir.pair_location_) {
+  // Q_result out = Q_calculate(vertexs_, heap_[index].pair_.first,
+  // heap_[index].pair_.second);
+  // heap_[index].position_ = out.position_;
+  // heap_[index].ischanged_ = true;
+  // }
+  // debug
 }
 
 void Simplify::simplify(std::size_t aim) {
-  while (vertnum_-- > aim)
+  while (vertnum_-- > aim) {
     remove();
+#ifdef DEBUG
+    std::cout << vertnum_ - aim << std::endl;
+#endif
+  }
 }

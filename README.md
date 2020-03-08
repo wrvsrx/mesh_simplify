@@ -10,5 +10,6 @@ A tools to simplify obj file (Use the algorithm in SIG'97).
 mkdir build
 cd build
 cmake ..
+make
 ```
 

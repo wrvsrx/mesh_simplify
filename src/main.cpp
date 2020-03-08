@@ -21,7 +21,7 @@ int main() {
   std::list<Face> fs;
   read_file(name, vs, fs);
   Simplify sim(vs, fs);
-  sim.simplify(100);
+  sim.simplify(50);
   write_file("../output/test.obj", vs, fs);
   return 0;
 }

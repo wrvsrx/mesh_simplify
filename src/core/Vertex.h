@@ -1,6 +1,6 @@
 #pragma once
 #include "Edge.h"
-#include "Q_matrix.h"
+#include "Q_Matrix.h"
 #include "Vec.h"
 #include "Face.h"
 #include <initializer_list>

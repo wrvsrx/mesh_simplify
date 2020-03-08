@@ -1,4 +1,4 @@
-#include "Q_matrix.h"
+#include "Q_Matrix.h"
 #include <stdexcept>
 Q_Matrix::Q_Matrix() {
   for (int i = 0; i < 4; ++i)

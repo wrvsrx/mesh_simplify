@@ -1,6 +1,7 @@
 #include "Parse.h"
 #include <cstddef>
 #include <fstream>
+#include <sstream>
 
 void add_edge(std::size_t vert1, std::size_t vert2,
               std::vector<Vertex> &vertex) {
@@ -10,33 +11,40 @@ void add_edge(std::size_t vert1, std::size_t vert2,
   }
 }
 
-void read_file(std::string name, std::vector<Vertex> &vertex,
-               std::list<Face> &face) {
+void read_file(std::string name, std::vector<Vertex> &vertexs,
+               std::list<Face> &faces) {
   std::ifstream fin;
   fin.open(name);
-  char *chara = new char[128];
+  std::string line, chara;
+  std::size_t v_num = 0;
   std::string tmp;
   double position[3];
   std::size_t vert[3];
-  for (std::size_t i = 0; !fin.eof(); ++i) {
-    fin >> chara;
-    if (fin.eof())
-      break;
-    if (*chara == '#') {
-      getline(fin, tmp);
-      --i;
-    } else if (*chara == 'v') {
-      fin >> position[0] >> position[1] >> position[2];
-      vertex.push_back(Vertex(position, i));
-    } else if (*chara == 'f') {
-      fin >> vert[0] >> vert[1] >> vert[2];
-      for (int i = 0; i < 3; ++i)
-        --vert[i];
-      face.push_back(Face(vert));
-      for (int j = 0; j < 3; ++j) {
-        add_edge(vert[j], vert[(j + 1) % 3], vertex);
-        vertex[vert[j]].face_in_neibor_.insert(&(face.back()));
+  while (getline(fin, line)) {
+    if (line[0] == 'v') {
+      if (line[1] != 'n') {
+        std::istringstream sin(line);
+        sin >> chara >> position[0] >> position[1] >> position[2];
+        vertexs.push_back(Vertex(position, v_num++));
       }
+    } else if (line[0] == 'f') {
+      std::istringstream sin(line);
+      sin >> chara;
+      for (int i = 0; i < 3; ++i) {
+        std::string stmp;
+        sin >> stmp;
+        std::size_t tmp = 0;
+        for (int j = 0; stmp[j] != '/' && stmp[j] != 0; ++j)
+          tmp = tmp * 10 + (stmp[j] - '0');
+        vert[i] = --tmp;
+      }
+      faces.push_back(Face(vert));
+    }
+  }
+  for (Face &f : faces) {
+    for (int i = 0; i < 3; ++i) {
+      add_edge(f.vertex_[i], f.vertex_[(i + 1) % 3], vertexs);
+      vertexs[f.vertex_[i]].face_in_neibor_.insert(&f);
     }
   }
   fin.close();
@@ -55,8 +63,9 @@ void write_file(std::string name, std::vector<Vertex> &vertex,
   }
   for (Face const &f : face) {
     if (!f.isdeleted_)
-      fout << 'f' << ' ' << vertex[f.vertex_[0]].index_ + 1 << ' ' << vertex[f.vertex_[1]].index_ + 1 << ' ' << vertex[f.vertex_[2]].index_ + 1
-           << std::endl;
+      fout << 'f' << ' ' << vertex[f.vertex_[0]].index_ + 1 << ' '
+           << vertex[f.vertex_[1]].index_ + 1 << ' '
+           << vertex[f.vertex_[2]].index_ + 1 << std::endl;
   }
   fout.close();
 }

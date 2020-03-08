@@ -37,15 +37,20 @@ int main(int argc, char *argv[]) {
       isverbose = true;
       break;
     case 'h':
-      std::cout << "./mesh [options]\n"
-                << "Options:\n"
-                << "\t-i [input file name] \t\t\t\t Set input file name (must)\n"
-                << "\t-o [output file name] \t\t\t\t Set output file name (must)\n"
-                << "\t-p [proportion] \t\t\t\t Set proportion (must)\n\n"
-                << "\t-t [threshold] \t\t\t\t Set threhold (optional) (it will make building quite slow)\n\n"
-                << "\t-v \t\t\t\t Show verbose information (optional)\n"
-                << "\t-h \t\t\t\t Show help information (optional)\n"
-                << std::endl;
+      std::cout
+          << "./mesh [options]\n"
+          << "Options:\n"
+          << "\t-i [input file name] \t\t\t\t Set input file name (must)\n"
+          << "\t-o [output file name] \t\t\t\t Set output file name (must)\n"
+          << "\t-p [proportion] \t\t\t\t Set proportion (must)\n"
+          << "\t-t [threshold] \t\t\t\t Set threhold (optional) (it will make "
+             "building quite slow)\n"
+          << "\t-v \t\t\t\t Show verbose information (optional)\n"
+          << "\t-h \t\t\t\t Show help information (optional)\n"
+          << "Examples:\n"
+          << "./mesh -i ../resources/armadillo.obj -o ../output/armadillo.obj -p 0.001 -v"
+          << std::endl;
+      return 0;
       break;
     }
   }

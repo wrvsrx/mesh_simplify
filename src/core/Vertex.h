@@ -2,6 +2,7 @@
 #include "Edge.h"
 #include "Q_matrix.h"
 #include "Vec.h"
+#include "Face.h"
 #include <initializer_list>
 #include <iostream>
 #include <utility>
@@ -20,5 +21,6 @@ public:
   Q_Matrix ma_;
   std::set<std::size_t> neibor_;
   std::set<std::size_t> pair_location_;
+  std::set<Face *> face_in_neibor_;
 };
 

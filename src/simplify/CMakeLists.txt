@@ -1,1 +1,1 @@
-add_library(Simplify simplify.cpp)
+add_library(Simplify Simplify.cpp)

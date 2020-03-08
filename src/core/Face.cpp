@@ -1,13 +1,14 @@
 #include "Face.h"
 #include "Vec.h"
+#include "Vertex.h"
 #include <cmath>
 #include <cstddef>
 #include <vector>
 
 Face::Face(std::size_t vert[3]) {
-  for (int i = 0; i < 3; ++i) {
+  for (int i = 0; i < 3; ++i)
     vertex_[i] = vert[i];
-  }
+  isdeleted_ = false;
 }
 
 void Face::set_parameter(std::vector<Vertex> const &pa) {

@@ -1,10 +1,10 @@
 #include "Simplify.h"
 #include "Core.h"
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <iostream>
 #include <stack>
-#include <cmath>
 struct Q_result {
   Vec<double, 3> position_;
   double cost_;
@@ -40,23 +40,19 @@ Q_result Q_calculate(std::vector<Vertex> &vs, std::size_t index1,
       out.position_ = 0.5 * (vs[index1] + vs[index2]);
       break;
     }
-#ifdef DEBUG
-    if (std::isnan(out.position_[0]))
-      std::cout << "nan" << std::endl;
-#endif
     out.cost_ = min_cost;
   }
   return out;
 }
 
 Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
-                   double threshold)
+                   double threshold, bool isverbose)
     : vertexs_(vs), faces_(fs), threshold2_(threshold * threshold),
-      vertnum_(vs.size()) {
+      facenum_(fs.size()), isverbose_(isverbose) {
   using std::size_t;
-#ifdef DEBUG
-  std::cout << "build start" << std::endl;
-#endif
+  if (isverbose_) {
+    std::cout << "build start" << std::endl;
+  }
   size_t v_number = vertexs_.size();
   for (Face &f : fs) {
     f.set_parameter(vs);
@@ -64,38 +60,45 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
       vs[f.vertex_[i]].ma_.add(f.paramater_);
     }
   }
-#ifdef DEBUG
-  std::cout << "calculating paramater finish" << std::endl;
-#endif
+  if (isverbose_) {
+    std::cout << "calculating paramater finish" << std::endl;
+  }
   for (size_t i = 0; i < v_number; ++i) {
-    // for (size_t j = i + 1; j < v_number; ++j) {
-    for (size_t const &j : vs[i].neibor_) {
-      bool isneibor = vs[i].search_neiborhood(j);
-      if (j < i) continue;
-      if (isneibor) {
+    if (threshold2_ == 0)
+      for (size_t const &j : vs[i].neibor_) {
+        if (j < i)
+          continue;
         heap_.push_back(Edge(i, j));
-      } else {
-        if (Vec<double, 3>(vs[i] - vs[j]).norm2() < threshold2_) {
+        Edge &new_pair = heap_.back();
+        Q_result result = Q_calculate(vs, i, j);
+        new_pair.cost_ = result.cost_;
+        new_pair.position_ = result.position_;
+      }
+    else
+      for (size_t j = i + 1; j < v_number; ++j) {
+        bool isneibor = vs[i].search_neiborhood(j);
+        if (isneibor) {
           heap_.push_back(Edge(i, j));
         } else {
-          continue;
+          if (Vec<double, 3>(vs[i] - vs[j]).norm2() < threshold2_) {
+            heap_.push_back(Edge(i, j));
+          } else {
+            continue;
+          }
         }
+        Edge &new_pair = heap_.back();
+        Q_result result = Q_calculate(vs, i, j);
+        new_pair.cost_ = result.cost_;
+        new_pair.position_ = result.position_;
       }
-      Edge &new_pair = heap_.back();
-      Q_result result = Q_calculate(vs, i, j);
-      new_pair.cost_ = result.cost_;
-      new_pair.position_ = result.position_;
-#ifdef DEBUG
-    if (std::isnan(new_pair.position_[0]))
-      std::cout << "nan at build" << std::endl;
-#endif
-    }
   }
   std::make_heap(heap_.begin(), heap_.end());
-#ifdef DEBUG
-  std::cout << "build finish" << std::endl;
-  std::cout << "total " << heap_.size() << " pairs" << std::endl;
-#endif
+  if (isverbose_) {
+    std::cout << "build finish" << std::endl;
+    std::cout << "total " << vertexs_.size() << " vertexs" << std::endl;
+    std::cout << "total " << heap_.size() << " pairs" << std::endl;
+    std::cout << "total " << faces_.size() << " faces" << std::endl;
+  }
   for (std::size_t i = 0; i < heap_.size(); ++i) {
     vs[heap_[i].pair_.first].pair_location_.insert(i);
     vs[heap_[i].pair_.second].pair_location_.insert(i);
@@ -159,11 +162,50 @@ void Simplify::remove() {
   Vertex &fir = vertexs_[heap_.front().pair_.first],
          &sec = vertexs_[heap_.front().pair_.second];
   fir = heap_[0].position_;
-  fir.ma_ = fir.ma_ + sec.ma_;
+  fir.ma_ = Q_Matrix();
   sec.isdeleted_ = true;
   sec.index_ = fir.index_;
+  for (Face *const &f : sec.face_in_neibor_) {
+    if (!f->isdeleted_) {
+      for (int i = 0; i < 3; ++i) {
+        if (f->vertex_[i] == fin) {
+          f->isdeleted_ = true;
+          facenum_--;
+          break;
+        } else if (f->vertex_[i] == sin) {
+          f->vertex_[i] = fin;
+        }
+      }
+      if (!f->isdeleted_) {
+        fir.face_in_neibor_.insert(f);
+      }
+    }
+  }
+  for (Face *const &f : fir.face_in_neibor_) {
+    if (!f->isdeleted_) {
+      f->set_parameter(vertexs_);
+      fir.ma_.add(f->paramater_);
+    }
+  }
   fir.pair_location_.erase(0);
   sec.pair_location_.erase(0);
+  for (std::size_t const &s : sec.pair_location_) {
+    if (heap_[s].pair_.first == sin)
+      heap_[s].pair_.first = fin;
+    if (heap_[s].pair_.second == sin)
+      heap_[s].pair_.second = fin;
+    bool isduplicate = false;
+    for (std::size_t const &c : fir.pair_location_) {
+      if (heap_[s] == heap_[c]) {
+        heap_[s].ischanged_ = true;
+        heap_[s].isdeleted_ = true;
+        isduplicate = true;
+        break;
+      }
+    }
+    if (!isduplicate)
+      fir.pair_location_.insert(s);
+  }
   for (std::size_t const &s : fir.pair_location_) {
     Q_result out =
         Q_calculate(vertexs_, heap_[s].pair_.first, heap_[s].pair_.second);
@@ -171,41 +213,14 @@ void Simplify::remove() {
     heap_[s].position_ = out.position_;
     heap_[s].ischanged_ = true;
   }
-  std::stack<std::size_t> tmp;
-  for (std::size_t const &s : sec.pair_location_) {
-    if (heap_[s].pair_.first == sin)
-      heap_[s].pair_.first = fin;
-    if (heap_[s].pair_.second == sin)
-      heap_[s].pair_.second = fin;
-    for (std::size_t const &c : fir.pair_location_) {
-      if (heap_[s] == heap_[c]) {
-        tmp.push(s);
-        break;
-      }
-    }
-    if (tmp.empty() || tmp.top() != s) {
-      Q_result out =
-          Q_calculate(vertexs_, heap_[s].pair_.first, heap_[s].pair_.second);
-      fir.pair_location_.insert(s);
-      heap_[s].cost_ = out.cost_;
-      heap_[s].position_ = out.position_;
-      heap_[s].ischanged_ = true;
-    }
-  }
-  while (!tmp.empty()) {
-    heap_[tmp.top()].ischanged_ = true;
-    heap_[tmp.top()].isdeleted_ = true;
-    tmp.pop();
-  }
   heap_[0].ischanged_ = true;
   heap_[0].isdeleted_ = true;
 }
 
 void Simplify::simplify(std::size_t aim) {
-  while (vertnum_-- > aim) {
-#ifdef DEBUG
-    // std::cout << vertnum_ - aim << ' ';
-#endif
+  while (facenum_ > aim)
     remove();
+  if (isverbose_) {
+    std::cout << facenum_ << " faces remained" << std::endl;
   }
 }

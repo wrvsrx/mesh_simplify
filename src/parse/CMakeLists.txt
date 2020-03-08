@@ -1,1 +1,1 @@
-add_library(Parse parse.cpp)
+add_library(Parse Parse.cpp)

@@ -1,6 +1,7 @@
 #include "Parse.h"
 #include <cstddef>
 #include <fstream>
+
 void add_edge(std::size_t vert1, std::size_t vert2,
               std::vector<Vertex> &vertex) {
   if (!vertex[vert1].search_neiborhood(vert2)) {
@@ -8,6 +9,7 @@ void add_edge(std::size_t vert1, std::size_t vert2,
     vertex[vert2].neibor_.insert(vert1);
   }
 }
+
 void read_file(std::string name, std::vector<Vertex> &vertex,
                std::list<Face> &face) {
   std::ifstream fin;
@@ -31,8 +33,10 @@ void read_file(std::string name, std::vector<Vertex> &vertex,
       for (int i = 0; i < 3; ++i)
         --vert[i];
       face.push_back(Face(vert));
-      for (int j = 0; j < 3; ++j)
+      for (int j = 0; j < 3; ++j) {
         add_edge(vert[j], vert[(j + 1) % 3], vertex);
+        vertex[vert[j]].face_in_neibor_.insert(&(face.back()));
+      }
     }
   }
   fin.close();
@@ -42,13 +46,6 @@ void write_file(std::string name, std::vector<Vertex> &vertex,
                 std::list<Face> &face) {
   std::ofstream fout;
   fout.open(name);
-  for (Vertex &v : vertex) {
-    Vertex *vtmp = &v;
-    while (vtmp->isdeleted_) {
-      vtmp = &(vertex[vtmp->index_]);
-    }
-    v.index_ = vtmp->index_;
-  }
   std::size_t ind = 0;
   for (Vertex &v : vertex) {
     if (!v.isdeleted_) {
@@ -57,17 +54,9 @@ void write_file(std::string name, std::vector<Vertex> &vertex,
     }
   }
   for (Face const &f : face) {
-    std::size_t ver[3];
-    for (int i = 0; i < 3; ++i) {
-      if (vertex[f.vertex_[i]].isdeleted_)
-        ver[i] = vertex[vertex[f.vertex_[i]].index_].index_;
-      else
-        ver[i] = vertex[f.vertex_[i]].index_;
-    }
-    if (ver[0] != ver[1] && ver[1] != ver[2] && ver[2] != ver[0]) {
-      fout << 'f' << ' ' << ver[0] + 1 << ' ' << ver[1] + 1 << ' ' << ver[2] + 1
+    if (!f.isdeleted_)
+      fout << 'f' << ' ' << vertex[f.vertex_[0]].index_ + 1 << ' ' << vertex[f.vertex_[1]].index_ + 1 << ' ' << vertex[f.vertex_[2]].index_ + 1
            << std::endl;
-    }
   }
   fout.close();
 }

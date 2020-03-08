@@ -54,7 +54,7 @@ template <class T, int dim> T Vec<T, dim>::norm2() const {
 
 template <class T, int dim>
 T inner(Vec<T, dim> const &l, Vec<T, dim> const &r) {
-  return l.transpose() * r;
+  return (l.transpose() * r)[0][0];
 }
 
 template <class T, int dim1, int dim2>

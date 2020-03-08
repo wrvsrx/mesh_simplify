@@ -5,7 +5,8 @@
 #include <vector>
 class Simplify {
 public:
-  Simplify(std::vector<Vertex> &, std::list<Face> &, double threshold = 0, bool isverbose = false);
+  Simplify(std::vector<Vertex> &, std::list<Face> &, double threshold = 0,
+           bool isverbose = false, bool isjudgereverse = false);
   void simplify(std::size_t num);
 
 protected:
@@ -20,4 +21,7 @@ protected:
   void update_cost(std::size_t index);
   void remove();
   bool isverbose_;
+  bool isjudgereverse_;
 };
+bool isinvert(std::vector<Vertex> &vs, std::size_t index,
+              Vec<double, 3> new_position);

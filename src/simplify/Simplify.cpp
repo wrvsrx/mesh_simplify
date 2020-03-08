@@ -11,44 +11,16 @@ struct Q_result {
 };
 
 Q_result Q_calculate(std::vector<Vertex> &vs, std::size_t index1,
-                     std::size_t index2) {
-  Q_Matrix Q = vs[index1].ma_ + vs[index2].ma_;
-  Q_result out;
-  try {
-    out.position_ = Q.max_point();
-    out.cost_ = Q.cal_norm(out.position_);
-  } catch (std::domain_error) {
-    double cost[3];
-    cost[0] = Q.cal_norm(vs[index1]);
-    cost[1] = Q.cal_norm(vs[index2]);
-    cost[2] = Q.cal_norm(0.5 * (vs[index1] + vs[index2]));
-    int index = 0;
-    double min_cost = cost[index];
-    for (int i = 1; i < 3; ++i)
-      if (cost[i] < min_cost) {
-        min_cost = cost[i];
-        index = i;
-      }
-    switch (index) {
-    case 0:
-      out.position_ = vs[index1];
-      break;
-    case 1:
-      out.position_ = vs[index2];
-      break;
-    case 2:
-      out.position_ = 0.5 * (vs[index1] + vs[index2]);
-      break;
-    }
-    out.cost_ = min_cost;
-  }
-  return out;
-}
+                     std::size_t index2);
+
+bool isreverse(std::vector<Vertex> &vs, std::size_t index,
+               Vec<double, 3> new_position);
 
 Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
-                   double threshold, bool isverbose)
+                   double threshold, bool isverbose, bool isjudgereverse)
     : vertexs_(vs), faces_(fs), threshold2_(threshold * threshold),
-      facenum_(fs.size()), isverbose_(isverbose) {
+      facenum_(fs.size()), isverbose_(isverbose),
+      isjudgereverse_(isjudgereverse) {
   using std::size_t;
   if (isverbose_) {
     std::cout << "build start" << std::endl;
@@ -72,6 +44,9 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
         Edge &new_pair = heap_.back();
         Q_result result = Q_calculate(vs, i, j);
         new_pair.cost_ = result.cost_;
+        if (isjudgereverse_ && (isreverse(vs, i, result.position_) ||
+                                isreverse(vs, j, result.position_)))
+          new_pair.cost_ += 100;
         new_pair.position_ = result.position_;
       }
     else
@@ -181,6 +156,7 @@ void Simplify::remove() {
       }
     }
   }
+  sec.face_in_neibor_.clear();
   for (Face *const &f : fir.face_in_neibor_) {
     if (!f->isdeleted_) {
       f->set_parameter(vertexs_);
@@ -210,6 +186,10 @@ void Simplify::remove() {
     Q_result out =
         Q_calculate(vertexs_, heap_[s].pair_.first, heap_[s].pair_.second);
     heap_[s].cost_ = out.cost_;
+    if (isjudgereverse_ &&
+        (isreverse(vertexs_, heap_[s].pair_.first, out.position_) ||
+         isreverse(vertexs_, heap_[s].pair_.second, out.position_)))
+      heap_[s].cost_ += 100;
     heap_[s].position_ = out.position_;
     heap_[s].ischanged_ = true;
   }
@@ -223,4 +203,64 @@ void Simplify::simplify(std::size_t aim) {
   if (isverbose_) {
     std::cout << facenum_ << " faces remained" << std::endl;
   }
+}
+
+Q_result Q_calculate(std::vector<Vertex> &vs, std::size_t index1,
+                     std::size_t index2) {
+  Q_Matrix Q = vs[index1].ma_ + vs[index2].ma_;
+  Q_result out;
+  try {
+    out.position_ = Q.max_point();
+    out.cost_ = Q.cal_norm(out.position_);
+  } catch (std::domain_error) {
+    double cost[3];
+    cost[0] = Q.cal_norm(vs[index1]);
+    cost[1] = Q.cal_norm(vs[index2]);
+    cost[2] = Q.cal_norm(0.5 * (vs[index1] + vs[index2]));
+    int index = 0;
+    double min_cost = cost[index];
+    for (int i = 1; i < 3; ++i)
+      if (cost[i] < min_cost) {
+        min_cost = cost[i];
+        index = i;
+      }
+    switch (index) {
+    case 0:
+      out.position_ = vs[index1];
+      break;
+    case 1:
+      out.position_ = vs[index2];
+      break;
+    case 2:
+      out.position_ = 0.5 * (vs[index1] + vs[index2]);
+      break;
+    }
+    out.cost_ = min_cost;
+  }
+  return out;
+}
+
+bool isreverse(std::vector<Vertex> &vs, std::size_t index,
+               Vec<double, 3> new_position) {
+  for (Face *const &f : vs[index].face_in_neibor_) {
+    if (!f->isdeleted_) {
+      Vec<double, 3> old_direct;
+      Vec<double, 3> new_direct;
+      for (int i = 0; i < 3; ++i) {
+        old_direct[i] = f->paramater_[i];
+      }
+      Vec<double, 3> new_vertex[3];
+      for (int i = 0; i < 3; ++i) {
+        if (f->vertex_[i] == index) {
+          new_vertex[i] = new_position;
+        } else
+          new_vertex[i] = vs[f->vertex_[i]];
+      }
+      new_direct = cross(Vec<double, 3>(new_vertex[1] - new_vertex[0]),
+                         Vec<double, 3>(new_vertex[2] - new_vertex[1]));
+      if (inner(old_direct, new_direct) < 0)
+        return true;
+    }
+  }
+  return false;
 }

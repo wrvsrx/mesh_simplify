@@ -13,3 +13,6 @@ cmake ..
 make
 ```
 
+## todo
+
+- [x] reversing prevention

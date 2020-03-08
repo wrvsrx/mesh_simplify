@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <iostream>
 #include <stack>
+#include <cmath>
 struct Q_result {
   Vec<double, 3> position_;
   double cost_;
@@ -17,11 +18,6 @@ Q_result Q_calculate(std::vector<Vertex> &vs, std::size_t index1,
     out.position_ = Q.max_point();
     out.cost_ = Q.cal_norm(out.position_);
   } catch (std::domain_error) {
-    // compare which is min and use it as position and use it to calculate
-    // cost
-#ifdef DEBUG
-    std::cout << "No solution" << std::endl;
-#endif
     double cost[3];
     cost[0] = Q.cal_norm(vs[index1]);
     cost[1] = Q.cal_norm(vs[index2]);
@@ -44,6 +40,10 @@ Q_result Q_calculate(std::vector<Vertex> &vs, std::size_t index1,
       out.position_ = 0.5 * (vs[index1] + vs[index2]);
       break;
     }
+#ifdef DEBUG
+    if (std::isnan(out.position_[0]))
+      std::cout << "nan" << std::endl;
+#endif
     out.cost_ = min_cost;
   }
   return out;
@@ -54,6 +54,9 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
     : vertexs_(vs), faces_(fs), threshold2_(threshold * threshold),
       vertnum_(vs.size()) {
   using std::size_t;
+#ifdef DEBUG
+  std::cout << "build start" << std::endl;
+#endif
   size_t v_number = vertexs_.size();
   for (Face &f : fs) {
     f.set_parameter(vs);
@@ -61,9 +64,14 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
       vs[f.vertex_[i]].ma_.add(f.paramater_);
     }
   }
+#ifdef DEBUG
+  std::cout << "calculating paramater finish" << std::endl;
+#endif
   for (size_t i = 0; i < v_number; ++i) {
-    for (size_t j = i + 1; j < v_number; ++j) {
+    // for (size_t j = i + 1; j < v_number; ++j) {
+    for (size_t const &j : vs[i].neibor_) {
       bool isneibor = vs[i].search_neiborhood(j);
+      if (j < i) continue;
       if (isneibor) {
         heap_.push_back(Edge(i, j));
       } else {
@@ -77,9 +85,17 @@ Simplify::Simplify(std::vector<Vertex> &vs, std::list<Face> &fs,
       Q_result result = Q_calculate(vs, i, j);
       new_pair.cost_ = result.cost_;
       new_pair.position_ = result.position_;
+#ifdef DEBUG
+    if (std::isnan(new_pair.position_[0]))
+      std::cout << "nan at build" << std::endl;
+#endif
     }
   }
   std::make_heap(heap_.begin(), heap_.end());
+#ifdef DEBUG
+  std::cout << "build finish" << std::endl;
+  std::cout << "total " << heap_.size() << " pairs" << std::endl;
+#endif
   for (std::size_t i = 0; i < heap_.size(); ++i) {
     vs[heap_[i].pair_.first].pair_location_.insert(i);
     vs[heap_[i].pair_.second].pair_location_.insert(i);
@@ -187,9 +203,9 @@ void Simplify::remove() {
 
 void Simplify::simplify(std::size_t aim) {
   while (vertnum_-- > aim) {
-    remove();
 #ifdef DEBUG
-    std::cout << vertnum_ - aim << std::endl;
+    // std::cout << vertnum_ - aim << ' ';
 #endif
+    remove();
   }
 }

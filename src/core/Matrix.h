@@ -11,8 +11,8 @@ public:
   T *operator[](int index);
   T const *operator[](int index) const;
   Matrix<T, dim1, dim2> operator-() const;
-  T determinate();
-  Matrix<T, dim1, dim2> inverse();
+  T determinate(T const &zero_limit = T(0));
+  Matrix<T, dim1, dim2> inverse(T const &zero_limit = T(0));
   void swap_row(int r1, int r2);
   void swap_column(int c1, int c2);
 
@@ -88,7 +88,7 @@ Matrix<T, dim1, dim2> Matrix<T, dim1, dim2>::operator-() const {
   return out;
 }
 
-template <class T, int dim1, int dim2> T Matrix<T, dim1, dim2>::determinate() {
+template <class T, int dim1, int dim2> T Matrix<T, dim1, dim2>::determinate(T const &zero_limit) {
   if (dim1 != dim2) {
     std::domain_error unconsistent_dim("unconsistent dim");
     throw(unconsistent_dim);
@@ -98,9 +98,9 @@ template <class T, int dim1, int dim2> T Matrix<T, dim1, dim2>::determinate() {
   bool isnegative = false;
   T const zero(0), one(1);
   for (int i = 0; i < n; ++i) {
-    if (tmp[i][i] == zero) {
+    if (tmp[i][i] < zero_limit && -zero_limit < tmp[i][i]) {
       for (int j = i + 1; j < n; ++j) {
-        if (tmp[j][i] != zero) {
+        if (tmp[j][i] > zero_limit || tmp[j][i] < -zero_limit) {
           tmp.swap_row(i, j);
           isnegative = !isnegative;
           break;
@@ -121,7 +121,7 @@ template <class T, int dim1, int dim2> T Matrix<T, dim1, dim2>::determinate() {
 }
 
 template <class T, int dim1, int dim2>
-Matrix<T, dim1, dim2> Matrix<T, dim1, dim2>::inverse() {
+Matrix<T, dim1, dim2> Matrix<T, dim1, dim2>::inverse(T const & zero_limit) {
   if (dim1 != dim2) {
     std::domain_error unconsistent_dim("unconsistent dim");
     throw(unconsistent_dim);
@@ -135,9 +135,9 @@ Matrix<T, dim1, dim2> Matrix<T, dim1, dim2>::inverse() {
   for (int i = 0; i < n; ++i)
     out[i][i] = one;
   for (int i = 0; i < n; ++i) {
-    if (tmp[i][i] == zero) {
+    if (tmp[i][i] < zero_limit && -zero_limit < tmp[i][i]) {
       for (int j = i + 1; j < n; ++j) {
-        if (tmp[j][i] != zero) {
+        if (tmp[j][i] > zero_limit || tmp[j][i] < -zero_limit) {
           tmp.swap_row(i, j);
           out.swap_row(i, j);
           break;

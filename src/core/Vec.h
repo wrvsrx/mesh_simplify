@@ -9,7 +9,7 @@ public:
   Vec(Matrix<T, dim, 1> const &);
   T &operator[](int index);
   T const &operator[](int index) const;
-  Matrix<T, 1, dim> inverse() const;
+  Matrix<T, 1, dim> transpose() const;
   T norm2() const;
 };
 
@@ -41,7 +41,7 @@ template <class T, int dim> T const &Vec<T, dim>::operator[](int index) const {
   return this->data_[index][0];
 }
 
-template <class T, int dim> Matrix<T, 1, dim> Vec<T, dim>::inverse() const {
+template <class T, int dim> Matrix<T, 1, dim> Vec<T, dim>::transpose() const {
   Matrix<T, 1, dim> out;
   for (int i = 0; i < dim; ++i)
     out[0][i] = this->data_[i][0];
@@ -49,12 +49,12 @@ template <class T, int dim> Matrix<T, 1, dim> Vec<T, dim>::inverse() const {
 }
 
 template <class T, int dim> T Vec<T, dim>::norm2() const {
-  return (this->inverse() * (*this))[0][0];
+  return (this->transpose() * (*this))[0][0];
 }
 
 template <class T, int dim>
 T inner(Vec<T, dim> const &l, Vec<T, dim> const &r) {
-  return l.inverse() * r;
+  return l.transpose() * r;
 }
 
 template <class T, int dim1, int dim2>

@@ -16,12 +16,14 @@ std::size_t sum(vector<Vertex> const &vs) {
 }
 #endif
 int main() {
-  std::string name("../resources/bunny.obj");
+  std::string name("../resources/bunny2.obj");
+  // std::string name("../resources/bunny.obj");
   std::vector<Vertex> vs;
   std::list<Face> fs;
   read_file(name, vs, fs);
   Simplify sim(vs, fs);
-  sim.simplify(50);
+  sim.simplify(vs.size() / 100);
+  // sim.simplify(100);
   write_file("../output/test.obj", vs, fs);
   return 0;
 }

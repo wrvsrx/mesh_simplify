@@ -2,13 +2,13 @@
 
 ## introduction
 
-A tools to simplify obj file (Use algorithm in SIG'97).
+A tools to simplify obj file (Use the algorithm in SIG'97).
 
 ## build
 
 ```bash
-	mkdir build
-	cd build
-	cmake ..
+mkdir build
+cd build
+cmake ..
 ```
 

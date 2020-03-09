@@ -137,7 +137,8 @@ void Simplify::remove() {
   Vertex &fir = vertexs_[heap_.front().pair_.first],
          &sec = vertexs_[heap_.front().pair_.second];
   fir = heap_[0].position_;
-  fir.ma_ = Q_Matrix();
+  // fir.ma_ = Q_Matrix();
+  fir.ma_ = fir.ma_ + sec.ma_;
   sec.isdeleted_ = true;
   sec.index_ = fir.index_;
   for (Face *const &f : sec.face_in_neibor_) {
@@ -157,12 +158,12 @@ void Simplify::remove() {
     }
   }
   sec.face_in_neibor_.clear();
-  for (Face *const &f : fir.face_in_neibor_) {
-    if (!f->isdeleted_) {
-      f->set_parameter(vertexs_);
-      fir.ma_.add(f->paramater_);
-    }
-  }
+  // for (Face *const &f : fir.face_in_neibor_) {
+    // if (!f->isdeleted_) {
+      // f->set_parameter(vertexs_);
+      // fir.ma_.add(f->paramater_);
+    // }
+  // }
   fir.pair_location_.erase(0);
   sec.pair_location_.erase(0);
   for (std::size_t const &s : sec.pair_location_) {
@@ -185,6 +186,8 @@ void Simplify::remove() {
   for (std::size_t const &s : fir.pair_location_) {
     Q_result out =
         Q_calculate(vertexs_, heap_[s].pair_.first, heap_[s].pair_.second);
+    // if (isverbose_ && out.cost_ < heap_[s].cost_)
+      // std::cout << "cost reduced ";
     heap_[s].cost_ = out.cost_;
     if (isjudgereverse_ &&
         (isreverse(vertexs_, heap_[s].pair_.first, out.position_) ||

@@ -74,12 +74,5 @@ int main(int argc, char *argv[]) {
   Simplify sim(vs, fs, threshold, isverbose, isjudgereverse);
   sim.simplify(fs.size() * proportion);
   write_file(outputname, vs, fs);
-  // std::vector<Vertex> vs = {Vertex(0, 0, 0, 0), Vertex(0, 0, 1, 0),
-                            // Vertex(1, 0, 0, 0), Vertex(0, 1, 0, 0)};
-  // std::size_t vers[3] = {1, 2, 3};
-  // Face a(vers);
-  // a.set_parameter(vs);
-  // vs[1].face_in_neibor_.insert(&a);
-  // std::cout << isinvert(vs, 1, Vec<double, 3>({1, 1, -1}));
   return 0;
 }

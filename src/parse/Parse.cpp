@@ -1,4 +1,5 @@
 #include "Parse.h"
+#include "Core.h"
 #include <cstddef>
 #include <fstream>
 #include <sstream>
